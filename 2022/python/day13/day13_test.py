@@ -1,4 +1,4 @@
-from .p13 import new_compare_pair
+from .day13 import new_compare_pair
 import functools as ft
 
 test_input = [

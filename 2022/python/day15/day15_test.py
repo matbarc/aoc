@@ -1,4 +1,4 @@
-from .p15 import agg_line_ranges, agg_ranges
+from .day15 import agg_line_ranges, agg_ranges
 
 
 def test_subset():
