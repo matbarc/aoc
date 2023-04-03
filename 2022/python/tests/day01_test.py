@@ -1,4 +1,4 @@
-from .day01 import part2, part1
+from ..day01 import part2, part1
 
 
 def test_part1():
