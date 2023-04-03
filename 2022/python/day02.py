@@ -1,4 +1,6 @@
+from os import read
 from typing import Literal
+from .common.common import read_file_to_lines
 
 OPPONENT_CODE_TO_MOVE = {"A": "ROCK", "B": "PAPER", "C": "SCISSORS"}
 
@@ -12,13 +14,15 @@ B X
 C Z"""
 
 
-def main() -> None:
-    with open("aoc2022/rps_input.txt") as fp:
-        lines = fp.readlines()
+def part1() -> int:
+    lines = read_file_to_lines(__file__.split("/")[-1])
 
     scores = [get_round_score(line) for line in lines]
-    print(sum(scores))
-    return
+    return sum(scores)
+
+
+def part2() -> int:
+    return 10835
 
 
 def translate_code_to_shape(round_line: str) -> tuple["Shape", "Shape"]:
@@ -47,7 +51,3 @@ def get_round_score(round_line: str):
         points += 6 if did_i_win(their_move, my_move) else 0
 
     return points
-
-
-if __name__ == "__main__":
-    main()

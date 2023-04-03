@@ -1,11 +1,11 @@
 #!/bin/python
 
 
-from ..common.common import read_file
+from .common.common import read_file_to_string
 
 
 def part1() -> int:
-    file_str = read_file(__file__.split("/")[-1])
+    file_str = read_file_to_string(__file__)
 
     master_list = []
     for elf_list in file_str.split("\n\n"):
@@ -15,7 +15,7 @@ def part1() -> int:
 
 
 def part2() -> int:
-    file_str = read_file(__file__.split("/")[-1])
+    file_str = read_file_to_string(__file__)
 
     master_list = []
     for elf_list in file_str.split("\n\n"):
