@@ -20,17 +20,15 @@ C Z"""
 
 
 def part1() -> int:
-    lines = read_file_to_lines(__file__.split("/")[-1])
+    move_tuples = read_file_to_lines(__file__, transformation=translate_moves_pt1)
 
-    move_tuples = [translate_moves_pt1(line) for line in lines]
     scores = [get_round_score(*moves) for moves in move_tuples]
     return sum(scores)
 
 
 def part2() -> int:
-    lines = read_file_to_lines(__file__.split("/")[-1])
+    move_tuples = read_file_to_lines(__file__, transformation=translate_moves_pt2)
 
-    move_tuples = [translate_moves_pt2(line) for line in lines]
     scores = [get_round_score(*moves) for moves in move_tuples]
     return sum(scores)
 

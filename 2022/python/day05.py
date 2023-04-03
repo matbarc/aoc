@@ -1,6 +1,8 @@
 import dataclasses
 import re
 
+from .common.common import read_file_to_string
+
 test_input = """    [D]    
 [N] [C]    
 [Z] [M] [P]
@@ -19,10 +21,22 @@ class MoveInstruction:
     to_i: int
 
 
-def main() -> None:
-    with open("day5.txt") as fp:
-        lines = fp.read()
-    stack_lines, instruction_lines = lines.split("\n\n")
+def part1() -> str:
+    stack_lines, instruction_lines = read_file_to_string(__file__).split("\n\n")
+
+    # translating to data-structures
+    instructions = [parse_instruction(line) for line in instruction_lines.splitlines()]
+    stacks = parse_stack(stack_lines.splitlines())
+
+    for instruction in instructions:
+        execute_in_place_9000(stacks, instruction)
+
+    top_of_stacks = [stack.pop() for stack in stacks if len(stack) > 0]
+    return "".join(top_of_stacks)
+
+
+def part2() -> str:
+    stack_lines, instruction_lines = read_file_to_string(__file__).split("\n\n")
 
     # translating to data-structures
     instructions = [parse_instruction(line) for line in instruction_lines.splitlines()]
@@ -32,8 +46,7 @@ def main() -> None:
         execute_in_place_9001(stacks, instruction)
 
     top_of_stacks = [stack.pop() for stack in stacks if len(stack) > 0]
-    print("".join(top_of_stacks))
-    return
+    return "".join(top_of_stacks)
 
 
 def execute_in_place_9000(stacks: list[list[str]], inst: MoveInstruction) -> None:
@@ -53,7 +66,7 @@ def execute_in_place_9001(stacks: list[list[str]], inst: MoveInstruction) -> Non
 
 
 def parse_stack(stack_lines: list[str]) -> list[list[str]]:
-    stacks = [[] for i in range(9)]
+    stacks = [[] for _ in range(9)]
     for line in stack_lines:
         for i, ch in enumerate(line):
             if ch.isalpha():
@@ -69,7 +82,3 @@ def parse_instruction(instruction_line: str) -> MoveInstruction:
 
     number_str, from_str, to_str = res.groups()
     return MoveInstruction(int(number_str), int(from_str) - 1, int(to_str) - 1)
-
-
-if __name__ == "__main__":
-    main()

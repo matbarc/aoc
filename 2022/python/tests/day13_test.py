@@ -1,4 +1,4 @@
-from ..day13 import new_compare_pair
+from ..day13 import compare_pair, part1, part2
 import functools as ft
 
 test_input = [
@@ -27,22 +27,22 @@ def test_1():
     left = [1, 1, 3, 1, 1]
     right = [1, 1, 5, 1, 1]
 
-    assert new_compare_pair(left, right) == -1
+    assert compare_pair(left, right) == -1
 
 
 def test_2():
     left = [7, 7, 7]
     right = [9]
 
-    assert new_compare_pair(left, right) == -1
-    assert new_compare_pair(right, left) == 1
+    assert compare_pair(left, right) == -1
+    assert compare_pair(right, left) == 1
 
 
 def test_3():
     left = [[4, 4], 4, 4, 4]
     right = [[4, 4], 4, 4]
 
-    assert new_compare_pair(left, right) == 1
+    assert compare_pair(left, right) == 1
 
 
 def test_sort():
@@ -67,13 +67,21 @@ def test_sort():
         [9],
     ]
 
-    assert sorted(test_input + extra, key=ft.cmp_to_key(new_compare_pair)) == expected
+    assert sorted(test_input + extra, key=ft.cmp_to_key(compare_pair)) == expected
 
 
 def test_good_indexes():
     pairs = [test_input[i * 2 : (i * 2) + 2] for i in range(len(test_input) // 2)]
     good_indexes = [
-        i for i, [l1, l2] in enumerate(pairs, 1) if new_compare_pair(l1, l2) == -1
+        i for i, [l1, l2] in enumerate(pairs, 1) if compare_pair(l1, l2) == -1
     ]
 
     assert sum(good_indexes) == 13
+
+
+def test_part1():
+    assert part1() == 6072
+
+
+def test_part2():
+    assert part2() == 22184

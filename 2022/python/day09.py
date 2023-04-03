@@ -2,6 +2,10 @@ from dataclasses import dataclass, replace
 import math
 from enum import Enum, auto
 
+from .common.common import read_file_to_lines
+
+# TODO: Make this solution generally less bad. Terribly over-engineered
+
 
 @dataclass(frozen=True, repr=True, eq=True)
 class Pos:
@@ -31,12 +35,10 @@ class Simulation:
 
     def simulate_command(self, command: str) -> None:
         direction, steps = self.parse_command(command)
-        print(command)
         while steps > 0:
             self._move_head_one_step(direction)
             steps -= 1
-        self.print_grid()
-
+        # self.print_grid()
         return
 
     def _move_head_one_step(self, direction: Direction) -> None:
@@ -81,7 +83,7 @@ class Simulation:
         return
 
     @staticmethod
-    def parse_command(command: str) -> (str, int):
+    def parse_command(command: str) -> tuple[Direction, int]:
         direction_str, steps_str = command.split()
 
         direction_lookup = {
@@ -109,45 +111,32 @@ class Simulation:
                 else:
                     string += ". "
             print(string)
+        return
 
     def __repr__(self) -> str:
         string = (
             "===========================\n"
             f"head: {self.head_pos}\n"
-            + f"tail: {self.tail_pos}\n"
             + f"visited: {self.tail_visited}\n"
             + "============================"
         )
         return string
 
 
-test_input = """R 5
-U 8
-L 8
-D 3
-R 17
-D 10
-L 25
-U 20"""
+def part1() -> int:
+    lines = read_file_to_lines(__file__)
 
-small_test = """R 5
-U 8"""
+    sim = Simulation(knots=1)
+    for line in lines:
+        sim.simulate_command(line)
+    return len(sim.tail_visited)
 
 
-def main() -> None:
-    with open("day9.txt") as fp:
-        lines = fp.readlines()
-
-    # lines = test_input.splitlines()
+def part2() -> int:
+    lines = read_file_to_lines(__file__)
 
     sim = Simulation(knots=9)
-    sim.print_grid()
     for line in lines:
         sim.simulate_command(line)
 
-    print(len(sim.tail_visited))
-    return
-
-
-if __name__ == "__main__":
-    main()
+    return len(sim.tail_visited)

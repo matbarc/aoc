@@ -3,6 +3,9 @@ like file reading and the likes
 """
 
 import pathlib
+from typing import TypeVar, Callable
+
+T = TypeVar("T")
 
 
 def read_file_to_string(fpath: str) -> str:
@@ -18,7 +21,9 @@ def read_file_to_string(fpath: str) -> str:
     return file_str
 
 
-def read_file_to_lines(fpath: str) -> list[str]:
+def read_file_to_lines(
+    fpath: str, transformation: Callable[[str], T] = lambda x: x
+) -> list[T]:
     # TODO: Try to get this function to be aware of file entry point (day)
     # without having to pass it explicitly
 
@@ -29,4 +34,4 @@ def read_file_to_lines(fpath: str) -> list[str]:
     with open(inputs_path / input_fname) as fp:
         lines = fp.readlines()
 
-    return lines
+    return [transformation(line) for line in lines]
