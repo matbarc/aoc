@@ -1,4 +1,4 @@
-from ..day15 import agg_line_ranges, agg_ranges
+from ..day15 import agg_line_ranges, agg_ranges, part1, part2
 
 
 def test_subset():
@@ -34,3 +34,11 @@ def test_triplet():
     computed = agg_line_ranges(input_)
     expected = [(1, 10), (20, 30)]
     assert computed == expected
+
+
+def test_part1():
+    assert part1() == 5809294
+
+
+def test_part2():
+    assert part2() == 10693731308112
