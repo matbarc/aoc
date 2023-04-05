@@ -1,6 +1,8 @@
-import time
-import os
 from colorama import Fore, init
+from typing import Optional
+from .common.common import read_file_to_string
+
+# TODO: Re-do this solution. This one is very ad-hoc and messes with the input
 
 init()
 test_input = """498,4 -> 498,6 -> 496,6
@@ -11,18 +13,27 @@ AIR_CHAR = " "
 WALL_CHAR = "#"
 
 
-def main() -> None:
-    with open("day14.txt") as fp:
-        real_input = fp.read()
+def part1() -> int:
+    file_str = read_file_to_string(__file__)
 
-    sim = Simulation(real_input)
-
+    sim = Simulation(file_str)
     while sim.tick():
         pass
 
-    sim.print_grid()
-    print(f"total resting particles: {sim.resting_particles}")
-    return
+    return sim.resting_particles
+
+
+def part2() -> int:
+    file_str = read_file_to_string(__file__)
+
+    # adding "infinite" flooring
+    file_str += "\n310,172 -> 700,172"
+
+    sim = Simulation(file_str)
+    while sim.tick():
+        pass
+
+    return sim.resting_particles
 
 
 Coord = tuple[int, int]
@@ -39,11 +50,11 @@ class Simulation:
         self.width = width
         self.length = len(grid) // width
 
-        self.active_sand = None
+        self.active_sand: Optional[tuple[int, int]] = None
         self.resting_particles = 0
         return
 
-    def tick(self) -> None:
+    def tick(self) -> bool:
         if self.active_sand is None:
             if not self.spawn_particle():
                 return False
@@ -54,31 +65,31 @@ class Simulation:
         return True
 
     def spawn_particle(self) -> bool:
-        x0, y0 = self.sand_source
+        if self.is_blocked(*self.sand_source):
+            return False  # terminate
 
-        if not self.is_blocked(x0, y0):
-            self.active_sand = self.sand_source
-            self.grid[self.coord_to_idx(x0, y0)] = SAND_CHAR
-            return True
-        return False
+        self.active_sand = self.sand_source
+        self.grid[self.coord_to_idx(*self.active_sand)] = SAND_CHAR
+        return True
 
     def move_active_particle(self) -> int:
-        x0, y0 = self.active_sand
-        sorted_potential_moves = [(x0, y0 + 1), (x0 - 1, y0 + 1), (x0 + 1, y0 + 1)]
-        for x, y in sorted_potential_moves:
+        if not self.active_sand:
+            raise ValueError("Invalid state")
 
+        x0, y0 = self.active_sand
+        ordered_potential_moves = [(x0, y0 + 1), (x0 - 1, y0 + 1), (x0 + 1, y0 + 1)]
+        for x, y in ordered_potential_moves:
             if self.is_oob(x, y):
                 self.grid[self.coord_to_idx(x0, y0)] = AIR_CHAR
                 self.active_sand = None
                 return -1  # terminate
 
             if not self.is_blocked(x, y):
-                if self.active_sand == (619, 170):
-                    print(self.active_sand, x, y, self.coord_to_idx(x, y))
                 self.grid[self.coord_to_idx(x, y)] = SAND_CHAR
                 self.grid[self.coord_to_idx(x0, y0)] = AIR_CHAR
                 self.active_sand = (x, y)
                 return 1  # regular
+
         self.resting_particles += 1
         return 0  # new spawn
 
@@ -90,14 +101,12 @@ class Simulation:
         index = self.coord_to_idx(x, y)
         try:
             return not oob and not self.grid[index] == AIR_CHAR
-        except IndexError as e:
-            print(e)
-            raise ValueError(f"{x,y,oob, index, len(self.grid)}")
+        except IndexError:
+            raise IndexError(f"{x,y,oob, index, len(self.grid)}")
 
     def is_oob(self, x: int, y: int) -> bool:
         if x % self.x_baseline >= self.width:
             return True
-
         return self.coord_to_idx(x, y) >= len(self.grid)
 
     def print_grid(self) -> None:
@@ -111,9 +120,6 @@ class Simulation:
             final += f"{i:03} {''.join([colored(ch) for ch in self.grid[start:end]])}\n"
 
         print(final)
-        return
-
-    def add_floor(self) -> None:
         return
 
     @staticmethod
@@ -146,7 +152,7 @@ class Simulation:
             filled_path.extend(sub_path)
         return filled_path
 
-    def _make_grid(self, wall_coords: list[tuple[int, int]]) -> (list[str], int):
+    def _make_grid(self, wall_coords: list[tuple[int, int]]) -> tuple[list[str], int]:
         coords = wall_coords + [self.sand_source]
 
         max_y = max(coords, key=lambda c: c[1])[1]
@@ -155,28 +161,12 @@ class Simulation:
         min_x = min(coords, key=lambda c: c[0])[0]
         self.x_baseline = min_x
 
-        def get_char(coord: tuple[int, int]) -> str:
-            if coord in wall_coords:
-                ch = WALL_CHAR
-            else:
-                ch = AIR_CHAR
-            return ch
-
         grid = [
-            get_char((x, y))
+            WALL_CHAR if (x, y) in wall_coords else AIR_CHAR
             for y in range(min_y, max_y + 1)
             for x in range(min_x, max_x + 1)
         ]
 
-        # adding floor for part 2
-        # grid += [AIR_CHAR for i in range(min_x, max_x + 1)]
-        # grid += [WALL_CHAR for i in range(min_x, max_x + 1)]
-
         width = max_x - min_x + 1
         assert len(grid) % width == 0
-        print(width)
         return (grid, width)
-
-
-if __name__ == "__main__":
-    main()
