@@ -1,6 +1,6 @@
 from colorama import Fore, init
 from typing import Optional
-from .common.common import read_file_to_string
+from .common.common import read_file_to_string, Coord
 
 # TODO: Re-do this solution. This one is very ad-hoc and messes with the input
 
@@ -34,9 +34,6 @@ def part2() -> int:
         pass
 
     return sim.resting_particles
-
-
-Coord = tuple[int, int]
 
 
 class Simulation:
@@ -123,7 +120,7 @@ class Simulation:
         return
 
     @staticmethod
-    def _parse_nodes(nodes_description: str) -> list[tuple[int, int]]:
+    def _parse_nodes(nodes_description: str) -> list[Coord]:
         path = [
             tuple(int(coord) for coord in coord_description.split(","))
             for coord_description in nodes_description.split(" -> ")
@@ -131,7 +128,7 @@ class Simulation:
         return path
 
     @staticmethod
-    def _filled_paths(nodes: list[tuple[int, int]]) -> list[tuple[int, int]]:
+    def _filled_paths(nodes: list[Coord]) -> list[Coord]:
         nodes_copy = nodes[:]
         filled_path = [nodes_copy[0]]
         for i in range(len(nodes_copy) - 1):
@@ -152,7 +149,7 @@ class Simulation:
             filled_path.extend(sub_path)
         return filled_path
 
-    def _make_grid(self, wall_coords: list[tuple[int, int]]) -> tuple[list[str], int]:
+    def _make_grid(self, wall_coords: list[Coord]) -> tuple[list[str], int]:
         coords = wall_coords + [self.sand_source]
 
         max_y = max(coords, key=lambda c: c[1])[1]
