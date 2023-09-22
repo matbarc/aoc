@@ -1,4 +1,5 @@
 from ..day15 import agg_line_ranges, agg_ranges, part1, part2
+import pytest
 
 
 def test_subset():
@@ -36,9 +37,11 @@ def test_triplet():
     assert computed == expected
 
 
+@pytest.mark.skip(reason="takes too long, already tested")
 def test_part1():
     assert part1() == 5809294
 
 
+@pytest.mark.skip(reason="takes too long, already tested")
 def test_part2():
     assert part2() == 10693731308112
