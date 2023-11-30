@@ -3,6 +3,8 @@ from dataclasses import dataclass
 from copy import copy
 import math
 
+from .common.common import read_file_to_lines
+
 test_input = """Blueprint 1: Each ore robot costs 4 ore. Each clay robot costs 2 ore. Each obsidian robot costs 3 ore and 14 clay. Each geode robot costs 2 ore and 7 obsidian.
 Blueprint 2: Each ore robot costs 2 ore. Each clay robot costs 3 ore. Each obsidian robot costs 3 ore and 8 clay. Each geode robot costs 3 ore and 12 obsidian."""
 
@@ -63,36 +65,36 @@ class State:
         self.workers = [x if i != robot else x - 1 for i, x in enumerate(self.workers)]
         return
 
-
-def main() -> None:
-    with open("day19.txt") as fp:
-        lines = fp.readlines()
-    # lines = test_input.splitlines()
-
-    bps = [Blueprint(desc) for desc in lines]
-
+def get_initial_state(time_remaining: int) -> State:
     balance = (0, 0, 0, 0)
     workers = (1, 0, 0, 0)
-    state0 = State(24, balance, workers)
+    return State(time_remaining, balance, workers)
+
+def part1() -> int:
+    bps = read_file_to_lines(__file__, transformation=lambda x: Blueprint(x))
+    state0 = get_initial_state(24)
+    
     maxs = [
-        (bp.id, find_blueprint_max_recursive(state0, bp, get_bp_max_mats(bp), (), 0))
+        (bp.id, find_blueprint_max_recursive(state0, bp, get_bp_max_mats(bp)))
         for bp in bps
     ]
-    print(maxs)
-    print(f"answer: {sum([id * val for id, val in maxs])}")
 
-    state0 = State(32, balance, workers)
-    maxs2 = [
-        find_blueprint_max_recursive(state0, bp, get_bp_max_mats(bp), (), 0)
-        for bp in bps[:3]
+    bp_quality = [bp_id * bp_max for bp_id, bp_max in maxs]
+    return sum(bp_quality)
+
+def part2() -> int:
+    bps = read_file_to_lines(__file__, transformation=lambda x: Blueprint(x))[:3]
+    state0 = get_initial_state(32)
+
+    maxs = [
+        find_blueprint_max_recursive(state0, bp, get_bp_max_mats(bp))
+        for bp in bps
     ]
-    print(maxs2)
-    print(f"answer 2: {math.prod(maxs2)}")
-    return
+    return math.prod(maxs)
 
 
 def find_blueprint_max_recursive(
-    state: State, bp: Blueprint, max_mats, prev_skipped, best_so_far
+    state: State, bp: Blueprint, max_mats, prev_skipped = (), best_so_far = 0
 ):
     if state.time_remaining == 1:
         return state.balance[3] + state.workers[3]
@@ -138,7 +140,7 @@ def find_blueprint_max_recursive(
 
 def material_upper_bound(state: State, material: int) -> int:
     t = state.time_remaining
-    return state.balance[material] + state.workers[material] * t + t * (t - 1) / 2
+    return int(state.balance[material] + state.workers[material] * t + t * (t - 1) / 2)
 
 
 def get_bp_max_mats(bp: Blueprint):
@@ -151,7 +153,3 @@ def get_bp_max_mats(bp: Blueprint):
 def update_balance(balance, workers):
     new_balance = tuple([bal + qty for bal, qty in zip(balance, workers)])
     return new_balance
-
-
-if __name__ == "__main__":
-    main()
