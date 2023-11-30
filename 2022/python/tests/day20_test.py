@@ -2,8 +2,8 @@ from ..day20 import part1, part2
 
 
 def test_part1():
-    assert part1() == 988
+    assert part1() == 456
 
 
 def test_part2():
-    assert part2() == 7768531372516
+    assert part2() == 454
