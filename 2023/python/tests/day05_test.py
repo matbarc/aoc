@@ -1,4 +1,4 @@
-from ..day05 import part1, part2, parse_input, locations
+from ..day05 import part1, part2, parse_input, parse_input_pt2, locations
 
 test_input = """seeds: 79 14 55 13
 
@@ -40,13 +40,25 @@ def test_parse_seeds():
     assert seeds == [79, 14, 55, 13]
 
 
+def test_parse_seeds2():
+    seeds, _ = parse_input_pt2(test_input)
+    assert len(seeds) == 27
+    assert min(seeds) == 55
+    assert max(seeds) == 92
+
+
 def test_seed_to_location():
     seeds, rosetta = parse_input(test_input)
     assert locations(seeds, rosetta) == [82, 43, 86, 35]
 
 
+def test_seed_to_location_pt2():
+    seeds, rosetta = parse_input_pt2(test_input)
+    assert min(locations(seeds, rosetta)) == 46
+
+
 def test_part1():
-    assert part1() == 1
+    assert part1() == 379_811_651
 
 
 def test_part2():
