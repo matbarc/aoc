@@ -1,4 +1,6 @@
 from .common.common import read_file_to_string
+import math
+import copy
 import itertools as it
 
 
@@ -10,7 +12,10 @@ def part1() -> int:
 
 
 def part2() -> int:
-    return 1
+    desc = read_file_to_string(__file__)
+    instructions, net = parse_network(desc)
+    turns = simulate_pt2(instructions, net)
+    return turns
 
 
 Network = dict[str, list[str]]
@@ -40,11 +45,14 @@ def simulate(instructions: it.cycle, network: Network) -> int:
 
 
 def simulate_pt2(instructions: it.cycle, network: Network) -> int:
-    start_poss = [node for node in network if node.endswith("A")]
-    jumps = 0
+    poss = [node for node in network if node.endswith("A")]
+    jumps = {pos: 0 for pos in poss}
 
-    while pos != "ZZZ":
-        pos = network[pos][next(instructions)]
-        jumps += 1
+    for pos in poss:
+        local_instructions = copy.copy(instructions)
+        pos0 = pos
+        while not pos.endswith("Z"):
+            pos = network[pos][next(local_instructions)]
+            jumps[pos0] += 1
 
-    return jumps
+    return math.lcm(*jumps.values())
