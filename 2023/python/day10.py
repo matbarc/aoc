@@ -8,7 +8,10 @@ def part1() -> int:
 
 
 def part2() -> int:
-    return 1
+    board = Board(read_file_to_string(__file__))
+    path = pathfind_loop(board)
+    return count_tiles_inside_loop(board, path)
+    # return 1
 
 
 Coord = tuple[int, int]
@@ -86,49 +89,16 @@ def pathfind_loop(board: Board) -> list[Coord]:
     return path
 
 
-def area_origins(board: Board, loop: list[Coord]) -> set[Coord]:
-    origins = set()
-
-    for coord in loop:
-        tile = board.idx(*coord)
-
-        match tile:
-            case "F":
-                if (candidate := (coord[0] + 1, coord[1] + 1)) not in loop:
-                    origins.add(candidate)
-            case "J":
-                if (candidate := (coord[0] - 1, coord[1] - 1)) not in loop:
-                    origins.add(candidate)
-            case "7":
-                if (candidate := (coord[0] - 1, coord[1] + 1)) not in loop:
-                    origins.add(candidate)
-            case "L":
-                if (candidate := (coord[0] + 1, coord[1] - 1)) not in loop:
-                    origins.add(candidate)
-            case _:
-                continue
-
-    return origins
-
-
 def count_tiles_inside_loop(board: Board, loop: list[Coord]) -> int:
-    origins = area_origins(board, loop)
-    print(origins)
+    """Graphics programmer style"""
+    count = 0
+    for y in range(board.h):
+        is_inside = False
+        for x in range(board.w):
+            if (x, y) in loop and board.idx(x, y) in "|JL":
+                is_inside = not is_inside
 
-    visited = [*origins]
-    to_process = [*origins]
-    enclosed = 0
-    while to_process:
-        cur_coord = to_process.pop()
-        neighbors = board.valid_neighbors(cur_coord)
+            elif is_inside and board.idx(x, y) == ".":
+                count += 1
 
-        for neighbor in neighbors:
-            if (neighbor in loop) or (neighbor in visited):
-                continue
-            visited.append(neighbor)
-            to_process.append(neighbor)
-
-        if board.idx(*cur_coord) == ".":
-            enclosed += 1
-
-    return enclosed
+    return count

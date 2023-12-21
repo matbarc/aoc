@@ -40,8 +40,9 @@ test_count1 = """...........
 
 def test_counts():
     board = Board(test_count1)
-    path = pathfind_loop(board)
-    assert count_tiles_inside_loop(board, path) == 4
+    loop = pathfind_loop(board)
+    count = count_tiles_inside_loop(board, loop)
+    assert count == 4
 
 
 def test_part1():
@@ -49,4 +50,4 @@ def test_part1():
 
 
 def test_part2():
-    assert part2() == 1
+    assert part2() == 349
