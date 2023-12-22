@@ -1,4 +1,4 @@
-from ..day19 import parse_input, part1, part2
+from ..day19 import part1, part2, run, run_part2
 
 test_input = """px{a<2006:qkq,m>2090:A,rfg}
 pv{a>1716:R,A}
@@ -19,14 +19,17 @@ hdj{m>838:A,pv}
 {x=2127,m=1623,a=2188,s=1013}"""
 
 
-def test_parse():
-    print(parse_input(test_input))
-    assert True
+def test_test_input():
+    assert run(test_input) == 19114
+
+
+def test_test_input2():
+    assert run_part2(test_input) == 167409079868000
 
 
 def test_part1():
-    assert part1() == 1
+    assert part1() == 332145
 
 
 def test_part2():
-    assert part2() == 1
+    assert part2() == 136661579897555
