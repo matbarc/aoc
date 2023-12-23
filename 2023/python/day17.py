@@ -1,9 +1,10 @@
 from typing import Literal, NamedTuple, Optional
-from .common.common import read_file_to_string
+
+# from .common.common import read_file_to_string
 
 
 def part1() -> int:
-    board = Board(read_file_to_string(__file__))
+    # board = Board(read_file_to_string(__file__))
     return 1
 
 
@@ -18,7 +19,6 @@ Direction = Literal["U", "D", "L", "R"]
 class State(NamedTuple):
     path: list[Coord]
     direction: Direction
-    consecutives: int
     heat_loss: int
 
 
@@ -34,7 +34,7 @@ class Board:
         return self._board[self.w * y + x]
 
     def simulate(self) -> int:
-        states: list[State] = [State([(0, 0)], "R", 0, 0), State([(0, 0)], "D", 0, 0)]
+        states: list[State] = [State([(0, 0)], "R", 0), State([(0, 0)], "D", 0)]
         mini: dict[Coord, tuple[int, list[Coord]]] = {
             (x, y): (1_000_000_000, []) for x in range(self.w) for y in range(self.h)
         }
@@ -44,12 +44,10 @@ class Board:
             possible_moves = self.possible_moves(s)
 
             for coord, direc in possible_moves:
-                if self.is_oob(coord) or (direc == s.direction and s.consecutives == 3):
-                    continue
-                elif (new_hloss := s.heat_loss + self.idx(coord)) < mini[coord][0]:
-                    new_path = s.path + [coord]
-                    new_consecs = 1 if s.direction != direc else s.consecutives + 1
-                    states.append(State(new_path, direc, new_consecs, new_hloss))
+                new_hloss = s.heat_loss + self.idx(coord)
+                new_path = s.path + [coord]
+                states.append(State(new_path, direc, new_hloss))
+                if new_hloss < mini[coord][0]:
                     mini[coord] = new_hloss, new_path
 
         print(mini[(self.w - 1, self.h - 1)])
@@ -62,15 +60,29 @@ class Board:
             "L": (-1, 0),
             "D": (0, 1),
         }
-        opposite: dict[Direction, Direction] = {"U": "D", "R": "L", "L": "R", "D": "U"}
-
+        turns: dict[Direction, tuple[Direction, Direction]] = {
+            "U": ("L", "R"),
+            "R": ("U", "D"),
+            "L": ("U", "D"),
+            "D": ("L", "R"),
+        }
         coord = state.path[-1]
-        new_coords = [
-            ((coord[0] + t[0], coord[1] + t[1]), d)
-            for d, t in transform.items()
-            if d != opposite[state.direction]
+
+        turn_moves = [
+            ((coord[0] + transform[direc][0], coord[1] + transform[direc][1]), direc)
+            for direc in turns[state.direction]
         ]
-        return new_coords
+
+        dx, dy = transform[state.direction]
+        forward_moves = [
+            ((coord[0] + i * dx, coord[1] + i * dy), state.direction)
+            for i in range(1, 4)
+        ]
+        return [
+            (move, direc)
+            for (move, direc) in turn_moves + forward_moves
+            if not self.is_oob(move)
+        ]
 
     def is_oob(self, coord: Coord) -> bool:
         if not (0 <= coord[0] < self.w) or not (0 <= coord[1] < self.h):
