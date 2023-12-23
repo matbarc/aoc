@@ -1,4 +1,4 @@
-from ..day17 import Board, part1, part2
+from ..day17 import dijkstra, parse_graph, part1, part2
 
 test_input = """2413432311323
 3215453535623
@@ -16,13 +16,15 @@ test_input = """2413432311323
 
 
 def test_parse():
-    board = Board(test_input)
-    assert board.simulate() == 102
+    g = parse_graph(test_input)
+    end = [*g][-1]
+    assert dijkstra(g, 1, 3, end) == 102
+    assert dijkstra(g, 4, 10, end) == 94
 
 
 def test_part1():
-    assert part1() == 1
+    assert part1() == 1195
 
 
 def test_part2():
-    assert part2() == 1
+    assert part2() == 1347
