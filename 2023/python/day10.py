@@ -43,20 +43,21 @@ class Board:
             return False
         return True
 
-    def first_valid_path(self) -> tuple[Coord, str]:
+    def valid_paths(self) -> list[tuple[Coord, str]]:
         x, y = self.starting_coord()
         valid_targets = {"right": "-J7", "left": "-FL", "up": "|7F", "down": "|LJ"}
 
+        valid = []
         if (y > 0) and (self.idx(x, y - 1) in valid_targets["up"]):
-            return (x, y - 1), "up"
+            valid.append(((x, y - 1), "up"))
         elif (y < self.h) and (self.idx(x, y + 1) in valid_targets["down"]):
-            return (x, y + 1), "down"
+            valid.append(((x, y + 1), "down"))
         elif (x > 0) and (self.idx(x - 1, y) in valid_targets["left"]):
-            return (x - 1, y), "left"
+            valid.append(((x - 1, y), "left"))
         elif (x < self.w) and (self.idx(x - 1, y) in valid_targets["right"]):
-            return (x + 1, y), "right"
+            valid.append(((x + 1, y), "right"))
 
-        raise ValueError()
+        return valid
 
     def next_coord(self, coord: Coord, prev_dir: str) -> tuple[Coord, str]:
         transformations = {
@@ -80,7 +81,7 @@ class Board:
 
 def pathfind_loop(board: Board) -> list[Coord]:
     starting_coord = board.starting_coord()
-    coord, direction = board.first_valid_path()
+    coord, direction = board.valid_paths()[0]
     path = [starting_coord, coord]
 
     while coord != starting_coord:
@@ -95,10 +96,10 @@ def count_tiles_inside_loop(board: Board, loop: list[Coord]) -> int:
     for y in range(board.h):
         is_inside = False
         for x in range(board.w):
-            if (x, y) in loop and board.idx(x, y) in "|JL":
-                is_inside = not is_inside
-
-            elif is_inside and board.idx(x, y) == ".":
+            if (x, y) in loop:
+                if board.idx(x, y) in "|JL":
+                    is_inside = not is_inside
+            elif is_inside:
                 count += 1
 
     return count
