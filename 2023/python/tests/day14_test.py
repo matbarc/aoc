@@ -1,4 +1,4 @@
-from ..day14 import Board, part1, part2
+from ..day14 import part1, part2, points, roll_up
 
 test_input = """O....#....
 O.OO#....#
@@ -13,9 +13,9 @@ O.#..O.#.#
 
 
 def test_parse():
-    board = Board(test_input)
-    board.simulate_roll((0, -1))
-    assert board.points() == 136
+    grid = test_input.splitlines()
+    grid = roll_up(grid)
+    assert points(grid) == 136
 
 
 def test_part1():
@@ -23,4 +23,4 @@ def test_part1():
 
 
 def test_part2():
-    assert part2() == 1
+    assert part2() == 101292

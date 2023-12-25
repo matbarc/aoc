@@ -1,77 +1,71 @@
-from .common.common import read_file_to_lines, read_file_to_string
-from collections import deque
-import itertools as it
+from .common.common import read_file_to_lines
 
 
 def part1() -> int:
-    desc = read_file_to_string(__file__)
-    board = Board(desc)
-    board.simulate_roll((0, -1))
-    return board.points()
+    grid = read_file_to_lines(__file__)
+    grid = roll_up(grid)
+    return points(grid)
 
 
 def part2() -> int:
-    desc = read_file_to_string(__file__)
-    board = Board(desc)
-    board.simulate_rolls(1_000_000_000)
-    return board.points()
+    grid = read_file_to_lines(__file__)
+    grid = simulate_cycles(grid, 1_000_000_000)
+    return points(grid)
 
 
-class Board:
-    def __init__(self, desc: str) -> None:
-        rocks = [
-            (ch, (x, y))
-            for y, line in enumerate(desc.splitlines())
-            for x, ch in enumerate(line)
-            if ch in "#O"
-        ]
+def simulate_cycles(grid: list[str], n: int):
+    seen = {tuple(grid)}
+    history = [tuple(grid)]
+    cycle_idx = 0
 
-        self.cubes = tuple(coord for ch, coord in rocks if ch == "#")
-        self.rocks = [coord for ch, coord in rocks if ch == "O"]
-        self.height = desc.count("\n") + 1
-        self.history = []
-        return
+    for i in range(n):
+        grid = simulate_cycle(grid)
 
-    def simulate_roll(self, transform: tuple[int, int]):
-        to_roll = deque(self.rocks[:])
-        stationary = []
+        if tuple(grid) in seen:
+            cycle_idx = i
+            break
 
-        while to_roll:
-            cur = to_roll.popleft()
+        seen.add(tuple(grid))
+        history.append(tuple(grid))
 
-            target = (cur[0] - transform[0], cur[1] + transform[1])
-            if target in to_roll:
-                to_roll.append(cur)
-            elif target in self.cubes or target in stationary or target[1] == -1:
-                stationary.append(cur)
-            else:
-                to_roll.appendleft(target)
+    cycle_beg = history.index(tuple(grid))
+    cycle_len = cycle_idx - cycle_beg + 1
+    iterations_after_cycles = (n - cycle_beg) % cycle_len
+    return history[cycle_beg + iterations_after_cycles]
 
-        self.rocks = tuple(sorted(stationary))
-        return
 
-    def simulate_rolls(self, n: int):
-        # N W S E
-        transforms = it.cycle([(0, -1), (-1, 0), (0, 1), (1, 0)])
+def simulate_cycle(grid: list[str]):
+    for _ in range(4):
+        grid = roll_up(grid)
+        grid = rotate_grid_90deg(grid)
+    return grid
 
-        for i in range(n):
-            cur_transform = next(transforms)
-            self.simulate_roll(cur_transform)
 
-            cur_id = hash((self.rocks, cur_transform))
-            try:
-                cycle_beg = self.history.index(cur_id)
-                cycle_len = i - cycle_beg
-                iterations_after_cycles = (n - cycle_beg) % cycle_len
+def transpose(grid: list[str]) -> list[str]:
+    return list(map("".join, zip(*grid)))
 
-                for _ in range(iterations_after_cycles):
-                    cur_transform = next(transforms)
-                    self.simulate_roll(cur_transform)
-                break
-            except ValueError:
-                self.history.append(cur_id)
 
-        return
+def rotate_grid_90deg(grid: list[str]) -> list[str]:
+    return ["".join(row[::-1]) for row in zip(*grid)]
 
-    def points(self) -> int:
-        return sum([self.height - y for _, y in self.rocks])
+
+def roll_up(grid: list[str]) -> list[str]:
+    grid = transpose(grid)
+    new_grid = []
+
+    for col in grid:
+        ordered_col = []
+        for group in col.split("#"):
+            ordered_col.append("".join(sorted(group, reverse=True)))
+
+        new_grid.append("#".join(ordered_col))
+
+    return transpose(new_grid)
+
+
+def points(grid) -> int:
+    return sum([line.count("O") * (len(grid) - y) for y, line in enumerate(grid)])
+
+
+if __name__ == "__main__":
+    part2()
