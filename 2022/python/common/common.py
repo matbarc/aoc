@@ -35,3 +35,6 @@ def read_file_to_lines(
         lines = fp.readlines()
 
     return [transformation(line) for line in lines]
+
+
+Coord = tuple[int, int]
